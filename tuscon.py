@@ -1,6 +1,5 @@
 import json
 import warnings
-import re
 from bs4 import BeautifulSoup
 
 
@@ -10,7 +9,7 @@ def about():
 
 # Surrounds a string with two curly brackets and a space
 def surround(string):
-    return "{{ " + string + " }}"
+    return "{[ " + string + " ]}"
 
 
 # Copies the static file to the given path
@@ -24,21 +23,31 @@ def cleanup(template):
     params_tags = template.find_all("tuscon_params")
     if len(params_tags) > 1:
         warnings.warn(
-            "Multiple <tuscon_params> tags were found. Only one is necessary. The first tag occurring will be used.")
-    template.tuscon_params = "delet_this"
+            "Multiple <tuscon_params> tags were found. Only one is necessary. The first tag occurrence will be used.")
+    for params_tag in params_tags:
+        params_tag.decompose()
 
 
 def fill_param(template, name, value):
-    occurrences1 = template.find_all(string=re.compile(surround(name)))
-    occurrences2 = template.find_all(attrs=re.compile(surround(name)))  # This doesn't work
-    print(occurrences1)
-    print(occurrences2)
-    # TODO implement this
+    surrounded_name = surround(name)
+    string_matches = set()
+    attribute_matches = set()
+    for tag in template.find_all():
+        if surrounded_name in str(tag.string):
+            string_matches.add(tag)
+        for attribute_value in tag.attrs.values():
+            if surrounded_name in str(attribute_value):
+                attribute_matches.add(tag)
+
+    print(string_matches)
+    print(attribute_matches)
+
+    # TODO Now the {[ ]} should be replaced with the value
 
 
 # The primary function that the user will call in their code
 # Handles all necessary tasks for generating finished HTML files in public/ using a given template and parameters
-def generate(template_name, parameter_values, path=""):
+def generate(template_name, parameter_dict, path=""):
     with open("templates/" + template_name) as file:
         template = BeautifulSoup(file, "lxml")
 
@@ -48,11 +57,14 @@ def generate(template_name, parameter_values, path=""):
                 "as a static file instead.")
 
         parameter_names = str(template.tuscon_params.string).split(",")
-        if len(parameter_names) > len(parameter_values):
-            raise Exception("More parameters are demanded by template than are supplied in function call.")
 
-        for parameter_number in range(len(parameter_names)):
-            fill_param(template, parameter_names[parameter_number].replace(" ", ""), parameter_values[parameter_number])
+        for p in range(len(parameter_names)):
+            parameter_names[p] = parameter_names[p].replace(" ", "")
+            if parameter_names[p] not in parameter_dict:
+                raise Exception("Parameter \"" + parameter_names[p] + "\" demanded by template not found in dictionary")
+
+        for parameter_name in parameter_names:
+            fill_param(template, parameter_name, parameter_dict[parameter_name])
 
         cleanup(template)
         # print(template.prettify())

@@ -1,3 +1,7 @@
 import tuscon
 
-tuscon.generate("test.html", [123])
+dictionary = {
+    "variable": 123,
+    "foo": "bar"
+}
+tuscon.generate("test.html", dictionary)
