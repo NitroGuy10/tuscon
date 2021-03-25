@@ -18,6 +18,11 @@ def serve(static_file_name, path=""):
     pass
 
 
+# Deletes the contents of the public/ folder
+def empty_public_folder():
+    pass
+
+
 # Removes any mention of tuscon and sets up the given BeautifulSoup object for output of an HTML file
 def cleanup(template):
     params_tags = template.find_all("tuscon_params")
@@ -28,10 +33,12 @@ def cleanup(template):
         params_tag.decompose()
 
 
+# Replace any occurrence of the parameter name in a tag's string or attribute with the parameter value
 def fill_param(template, name, value):
     surrounded_name = surround(name)
     string_matches = set()
     attribute_matches = set()
+
     for tag in template.find_all():
         if surrounded_name in str(tag.string):
             string_matches.add(tag)
@@ -39,17 +46,19 @@ def fill_param(template, name, value):
             if surrounded_name in str(attribute_value):
                 attribute_matches.add(tag)
 
-    print(string_matches)
-    print(attribute_matches)
-
-    # TODO Now the {[ ]} should be replaced with the value
+    for tag in string_matches:
+        tag.string.replace_with(str(tag.string).replace(surrounded_name, str(value)))
+    for tag in attribute_matches:
+        for key in tag.attrs.keys():
+            if surrounded_name in tag[key]:
+                tag[key] = tag[key].replace(surrounded_name, str(value))
 
 
 # The primary function that the user will call in their code
 # Handles all necessary tasks for generating finished HTML files in public/ using a given template and parameters
 def generate(template_name, parameter_dict, path=""):
-    with open("templates/" + template_name) as file:
-        template = BeautifulSoup(file, "lxml")
+    with open("templates/" + template_name) as template_file:
+        template = BeautifulSoup(template_file, "lxml")
 
         if len(template.find_all("tuscon_params")) == 0:
             raise Exception(
@@ -67,6 +76,11 @@ def generate(template_name, parameter_dict, path=""):
             fill_param(template, parameter_name, parameter_dict[parameter_name])
 
         cleanup(template)
-        # print(template.prettify())
-        print("Generation complete!")
 
+        if path == "":
+            path = template_name
+        with open("public/" + path, "w") as output_file:
+            output_file.write(template.prettify())
+
+        # print(template.prettify())
+    print("Successfully generated " + path + " using template" + template_name)
