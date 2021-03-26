@@ -4,8 +4,8 @@ dictionary = {
     "variable": 123,
     "foo": "bar"
 }
-tuscon.generate("test.html", dictionary)
+tuscon.construct("test.html", dictionary, "test.html")
+tuscon.serve("style.css", "style.css")
 
-# TODO function to delete contents of the public/ folder
+# TODO function to delete contents of the output folder
 # TODO ability to use directories (which will be created) in path name  (e.g. "test_folder/test.html")
-# TODO serve static files

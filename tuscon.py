@@ -1,6 +1,20 @@
 import json
 import warnings
+import os
+import shutil
 from bs4 import BeautifulSoup
+
+# The directory in which filled templates will be created
+# Static files will copied into here too
+# The contents of this folder should represent the root of your site
+output_dir = "public/"
+
+# The directory from which unchanging static files will be copied into the output directory
+# This is where your CSS files, JavaScript files, unchanging HTML pages, images, and other media would go
+static_dir = "static/"
+
+# The directory where your HTML templates will go
+templates_dir = "templates/"
 
 
 def about():
@@ -14,12 +28,14 @@ def surround(string):
 
 # Copies the static file to the given path
 # No parsing or generation is done
-def serve(static_file_name, path=""):
-    pass
+# Certain file metadata is not preserved; if you want that metadata then copy it yourself lol
+def serve(name, path=""):
+    shutil.copyfile(static_dir + name, output_dir + path)
+    print("Successfully served " + path + " from source " + name)
 
 
-# Deletes the contents of the public/ folder
-def empty_public_folder():
+# Deletes the contents of the output folder
+def empty_output_folder():
     pass
 
 
@@ -56,8 +72,8 @@ def fill_param(template, name, value):
 
 # The primary function that the user will call in their code
 # Handles all necessary tasks for generating finished HTML files in public/ using a given template and parameters
-def generate(template_name, parameter_dict, path=""):
-    with open("templates/" + template_name) as template_file:
+def construct(template_name, parameter_dict, path):
+    with open(templates_dir + template_name) as template_file:
         template = BeautifulSoup(template_file, "lxml")
 
         if len(template.find_all("tuscon_params")) == 0:
@@ -77,10 +93,8 @@ def generate(template_name, parameter_dict, path=""):
 
         cleanup(template)
 
-        if path == "":
-            path = template_name
-        with open("public/" + path, "w") as output_file:
+        with open(output_dir + path, "w") as output_file:
             output_file.write(template.prettify())
 
         # print(template.prettify())
-    print("Successfully generated " + path + " using template" + template_name)
+    print("Successfully generated " + path + " using template " + template_name)
