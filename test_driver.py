@@ -1,9 +1,11 @@
 import tuscon
-import os
 
+number = 123
 dictionary = {
-    "variable": 123,
-    "foo": "bar"
+    "variable": number,
+    "less_than_32": number < 32,
+    "digits": str(number),
+    "sentence": ["cool", "beans", "bro"]
 }
 tuscon.construct("test.html", dictionary, "test.html")
 tuscon.serve("style.css", "stylesheets/style.css")

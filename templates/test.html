@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<tuscon_params>variable</tuscon_params>
+<tuscon_params>variable, less_than_32, digits, sentence</tuscon_params>
 <head>
     <meta charset="UTF-8">
     <title>Test Template</title>
@@ -9,5 +9,18 @@
 <body>
     <h1 title="{[ variable ]}">Test Template!</h1>
     <p>I think {[ variable ]} is a very cool value.</p>
+    <p tuscon_if="less_than_32">That's so few, I can count it on one hand!</p>
+    <ul>
+        <li tuscon_for="digit in digits" title="{[ digit ]}">{[ digit ]}</li>
+    </ul>
+    <h2>{[ sentence ]}</h2>
+    <ul>
+        <li tuscon_for="word in sentence" title="{[ word ]}">
+            <p>{[ word ]}</p>
+            <ul>
+                <li tuscon_for="letter in word" title="{[ letter ]}">{[ letter ]}</li>
+            </ul>
+        </li>
+    </ul>
 </body>
 </html>

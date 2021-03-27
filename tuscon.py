@@ -1,4 +1,5 @@
 import json
+import copy
 import warnings
 import os
 import shutil
@@ -63,27 +64,73 @@ def cleanup(template):
             "Multiple <tuscon_params> tags were found. Only one is necessary. The first tag occurrence will be used.")
     for params_tag in params_tags:
         params_tag.decompose()
+    for temp_div in template.find_all(tuscon_temp_div=True):
+        temp_div.unwrap()
+
+
+# Removes a tag if its condition is False
+# Returns True if the tag was deleted
+def do_if(tag, dictionary):
+    if tag.get("tuscon_if"):
+        if not dictionary[tag["tuscon_if"]]:
+            tag.decompose()
+            return True
+        else:
+            del tag["tuscon_if"]
+
+
+# For-each functionality
+# Returns True if for-each operations were done (also an indicator that the tag parse()'d itself)
+def do_for(tag, dictionary, template):
+    if tag.get("tuscon_for"):
+        for_var = tag["tuscon_for"].split(" in ")[0]
+        for_in = tag["tuscon_for"].split(" in ")[1]
+        del tag["tuscon_for"]
+
+        temp_div = template.new_tag("div", tuscon_temp_div="")
+        tag.insert_after(temp_div)
+        for item in dictionary[for_in]:
+            new_element = copy.copy(tag)
+
+            canonical_dictionary = copy.copy(dictionary)
+            canonical_dictionary[for_var] = item
+            parse(new_element, canonical_dictionary, template)
+            parse_children(new_element, canonical_dictionary, template)
+
+            temp_div.append(new_element)
+
+        tag.decompose()
 
 
 # Replace any occurrence of the parameter name in a tag's string or attribute with the parameter value
-def fill_param(template, name, value):
+def fill_param(tag, name, value):
     surrounded_name = surround(name)
-    string_matches = set()
-    attribute_matches = set()
-
-    for tag in template.find_all():
-        if surrounded_name in str(tag.string):
-            string_matches.add(tag)
-        for attribute_value in tag.attrs.values():
-            if surrounded_name in str(attribute_value):
-                attribute_matches.add(tag)
-
-    for tag in string_matches:
+    if tag.string:
         tag.string.replace_with(str(tag.string).replace(surrounded_name, str(value)))
-    for tag in attribute_matches:
+    if tag.attrs:
         for key in tag.attrs.keys():
             if surrounded_name in tag[key]:
                 tag[key] = tag[key].replace(surrounded_name, str(value))
+
+
+# fill_param() for every item in a dictionary
+def fill_all_params(tag, dictionary):
+    for name in dictionary.keys():
+        fill_param(tag, name, dictionary[name])
+
+
+# do_if(), do_for(), and fill_all_params() on the tag
+def parse(tag, dictionary, template):
+    if not do_if(tag, dictionary):  # If the tag was not deleted
+        if not do_for(tag, dictionary, template):  # If the tag did not already parse itself
+            fill_all_params(tag, dictionary)
+
+
+def parse_children(tag, dictionary, template):
+    for child in tag.contents:
+        if str(type(child)) == "<class 'bs4.element.Tag'>":  # There's probably a better way to do this
+            parse(child, dictionary, template)
+            parse_children(child, dictionary, template)
 
 
 # The primary function that the user will call in their code
@@ -101,13 +148,13 @@ def construct(template_name, parameter_dict, path):
 
         parameter_names = str(template.tuscon_params.string).split(",")
 
+        # Remove spaces from parameter names and ensure they all exist within the dictionary
         for p in range(len(parameter_names)):
             parameter_names[p] = parameter_names[p].replace(" ", "")
             if parameter_names[p] not in parameter_dict:
                 raise Exception("Parameter \"" + parameter_names[p] + "\" demanded by template not found in dictionary")
 
-        for parameter_name in parameter_names:
-            fill_param(template, parameter_name, parameter_dict[parameter_name])
+        parse_children(template, parameter_dict, template)
 
         cleanup(template)
 
