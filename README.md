@@ -2,7 +2,11 @@
 
 > *too-skawn*
 
-Generate entire static websites from as little as one json file.
+HTML files with parameters, if statements, and for loops.
+
+Meant for generating static sites from data (files).
+
+Make templates -> Write some basic Python code -> Generate your own static site
 
 ---
 

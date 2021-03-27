@@ -26,11 +26,27 @@ def surround(string):
     return "{[ " + string + " ]}"
 
 
+# Normalizes the given path name
+# If make_dirs == true, creates the directories that constitute the path
+# Raises an exception if it thinks files will be created outside of the output directory
+def check_path(path, make_dirs=False):
+    path = os.path.normpath(path).replace("\\", "/")
+    if make_dirs:
+        if path[:7] != output_dir:
+            raise Exception(path + " does not appear to be in the " + output_dir +
+                            " directory. Creating files outside the " + output_dir +
+                            " directory probably isn't a good idea.")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+    return path
+
+
 # Copies the static file to the given path
 # No parsing or generation is done
 # Certain file metadata is not preserved; if you want that metadata then copy it yourself lol
-def serve(name, path=""):
-    shutil.copyfile(static_dir + name, output_dir + path)
+def serve(name, path):
+    name = check_path(static_dir + name)
+    path = check_path(output_dir + path, True)
+    shutil.copyfile(name, path)
     print("Successfully served " + path + " from source " + name)
 
 
@@ -73,7 +89,9 @@ def fill_param(template, name, value):
 # The primary function that the user will call in their code
 # Handles all necessary tasks for generating finished HTML files in public/ using a given template and parameters
 def construct(template_name, parameter_dict, path):
-    with open(templates_dir + template_name) as template_file:
+    template_name = check_path(templates_dir + template_name)
+    path = check_path(output_dir + path, True)
+    with open(template_name) as template_file:
         template = BeautifulSoup(template_file, "lxml")
 
         if len(template.find_all("tuscon_params")) == 0:
@@ -93,8 +111,7 @@ def construct(template_name, parameter_dict, path):
 
         cleanup(template)
 
-        with open(output_dir + path, "w") as output_file:
+        with open(path, "w") as output_file:
             output_file.write(template.prettify())
 
-        # print(template.prettify())
     print("Successfully generated " + path + " using template " + template_name)
