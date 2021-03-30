@@ -1,4 +1,3 @@
-import json
 import copy
 import warnings
 import os
@@ -52,8 +51,15 @@ def serve(name, path):
 
 
 # Deletes the contents of the output folder
-def empty_output_folder():
-    pass
+# If agree == True, then YOU AGREE THAT YOU WON'T GET MAD AT ME FOR DELETING ANYTHING YOU PUT IN THE OUTPUT FOLDER, OK?
+# After all, you called the function, weirdo
+def empty_output_folder(agree=False):
+    if agree:
+        shutil.rmtree(output_dir)
+        os.makedirs(output_dir)
+        print("Output directory cleared!!!")
+    else:
+        print("Output directory not cleared. Call empty_output_folder(True) if you actually want to clear it.")
 
 
 # Removes any mention of tuscon and sets up the given BeautifulSoup object for output of an HTML file
