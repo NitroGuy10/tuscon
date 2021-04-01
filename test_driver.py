@@ -1,5 +1,4 @@
 import tuscon
-import json
 
 number = 123
 dictionary = {
@@ -8,6 +7,6 @@ dictionary = {
     "digits": str(number),
     "sentence": ["cool", "beans", "bro"]
 }
-tuscon.empty_output_folder(True)
+tuscon.empty_output_folder()
 tuscon.construct("test.html", dictionary, "test.html")
 tuscon.serve("style.css", "stylesheets/style.css")
