@@ -1,4 +1,5 @@
 import tuscon
+import shutil
 
 number = 123
 dictionary = {
@@ -9,4 +10,4 @@ dictionary = {
 }
 tuscon.empty_output_folder()
 tuscon.construct("test.html", dictionary, "test.html")
-tuscon.serve("style.css", "stylesheets/style.css")
+shutil.copyfile("static/style.css", tuscon.output_dir + "style.css")

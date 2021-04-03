@@ -17,11 +17,6 @@ output_dir = "public/"
 
 The contents of this folder should represent the root of your site."""
 
-static_dir = "static/"
-"""The directory from which unchanging static files will be copied into the output directory.
-
-This is where your CSS files, JavaScript files, unchanging HTML pages, images, and other media would go."""
-
 templates_dir = "templates/"
 """The directory where your HTML templates will go."""
 
@@ -59,22 +54,6 @@ def check_path(path, make_dirs=False):
                             " directory probably isn't a good idea.")
         os.makedirs(os.path.dirname(path), exist_ok=True)
     return path
-
-
-def serve(name, path):
-    """Copies the static file to the given path.
-
-    No parsing or generation is done.
-    Certain file metadata is not preserved; if you want that metadata then copy it yourself lol.
-
-    :param name: Path and name of the static file
-    :type name: str
-    :param path: Path and name of the new copy
-    :type path: str"""
-    name = check_path(static_dir + name)
-    path = check_path(output_dir + path, True)
-    shutil.copyfile(name, path)
-    print("Successfully served " + path + " from source " + name)
 
 
 def empty_output_folder():
