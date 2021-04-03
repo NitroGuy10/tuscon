@@ -81,12 +81,14 @@ def empty_output_folder():
     """Deletes the contents of the output folder.
 
     Friendly reminder to be absolutely certain you won't delete anything important by calling this function."""
-    shutil.rmtree(output_dir)
+    if os.path.isdir(output_dir):
+        shutil.rmtree(output_dir)
+        print("Output directory cleared!!!")
+    else:
+        print("Output directory doesn't exist. It will be created now.")
     os.makedirs(output_dir)
-    print("Output directory cleared!!!")
 
 
-#
 def cleanup(template):
     """Removes any mention of tuscon and sets up the given BeautifulSoup object for output of an HTML file.
 
