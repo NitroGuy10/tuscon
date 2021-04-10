@@ -2,18 +2,17 @@
 
 Construct webpages using HTML with parameters, if statements, and for loops.
 
-Intended for static site generation.
+Dead-simple web-templating intended for static site generation.
 
 Made by NitroGuy10"""
 import copy
 import warnings
 import os
-import shutil
 from bs4 import BeautifulSoup
 
 
 output_dir = "public/"
-"""The directory in which filled templates will be created and static files will be copied.
+"""The directory in which filled templates will be created
 
 The contents of this folder should represent the root of your site."""
 
@@ -54,18 +53,6 @@ def check_path(path, make_dirs=False):
                             " directory probably isn't a good idea.")
         os.makedirs(os.path.dirname(path), exist_ok=True)
     return path
-
-
-def empty_output_folder():
-    """Deletes the contents of the output folder.
-
-    Friendly reminder to be absolutely certain you won't delete anything important by calling this function."""
-    if os.path.isdir(output_dir):
-        shutil.rmtree(output_dir)
-        print("Output directory cleared!!!")
-    else:
-        print("Output directory doesn't exist. It will be created now.")
-    os.makedirs(output_dir)
 
 
 def cleanup(template):
@@ -208,10 +195,8 @@ def construct(template_name, parameter_dict, path=""):
     :rtype: str
     :raises Exception: If tuscon_params HTML tag is absent in template or if a parameter demanded by tuscon_params is
     not found in dictionary"""
-    template_name = check_path(templates_dir + template_name)
+    template_name = check_path(os.path.join(templates_dir, template_name))
     final_html = ""
-    if path != "":
-        path = check_path(output_dir + path, True)
     with open(template_name) as template_file:
         template = BeautifulSoup(template_file, "lxml")
 
@@ -234,6 +219,7 @@ def construct(template_name, parameter_dict, path=""):
         final_html = template.prettify()
 
         if path != "":
+            path = check_path(os.path.join(output_dir + path), True)
             with open(path, "w") as output_file:
                 output_file.write(final_html)
 

@@ -1,5 +1,6 @@
 import tuscon
 import shutil
+import os
 
 number = 123
 dictionary = {
@@ -8,6 +9,7 @@ dictionary = {
     "digits": str(number),
     "sentence": ["cool", "beans", "bro"]
 }
-tuscon.empty_output_folder()
-tuscon.construct("test.html", dictionary, "test.html")
+if os.path.exists(tuscon.output_dir):
+    shutil.rmtree(tuscon.output_dir)
+tuscon.construct("test.html", dictionary, "index.html")
 shutil.copyfile("static/style.css", tuscon.output_dir + "style.css")
