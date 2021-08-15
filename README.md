@@ -21,6 +21,12 @@ git clone https://github.com/NitroGuy10/tuscon
 # Create a virtual environment
 python3 -m venv venv
 
+# Activate it (Windows)
+venv\Scripts\activate.bat
+
+# Activate it (Mac/Linux)
+source venv/bin/activate
+
 # Install the requirements
 pip3 install -r requirements.txt
 ```
